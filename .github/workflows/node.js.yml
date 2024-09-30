@@ -1,0 +1,40 @@
+name: STV Voting Platform CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        # Verificar compatibilidade com versões de Node.js suportadas
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Usar Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+      
+    - name: Instalar dependências
+      run: npm ci
+      
+    - name: Compilar circuito ZK
+      run: node scripts/compileCircuit.js  # Script para compilar circuitos ZK [[2]](https://poe.com/citation?message_id=259686874111&citation=2)[[4]](https://poe.com/citation?message_id=259686874111&citation=4)
+
+    - name: Gerar zk-proof de exemplo
+      run: node scripts/generateProof.js   # Script para gerar provas zk [[5]](https://poe.com/citation?message_id=259686874111&citation=5)
+
+    - name: Rodar testes
+      run: npm test  # Executa os testes unitários e de integração [[3]](https://poe.com/citation?message_id=259686874111&citation=3)
+
+    - name: Build do projeto (se necessário)
+      run: npm run build --if-present
